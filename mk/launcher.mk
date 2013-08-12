@@ -6,7 +6,7 @@ LAUNCHER		:=launcher
 LAUNCH_CMD		:=./$(RELEASE_DIR)$(TARGET)
 
 #lanch option
-LAUNCH_CONFIG	:=$(PWD)/opsm-position-tracker.conf
+LAUNCH_CONFIG	:=$(PWD)//particle-localizer.conf
 
 #launch command
 LAUNCH_SCRIPT	:=if [ -e $(LAUNCH_CONFIG) ] ; then $(LAUNCH_CMD) -g $(LAUNCH_CONFIG) "$$"@; else $(LAUNCH_CMD) "$$"@ -G $(LAUNCH_CONFIG); fi

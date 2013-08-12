@@ -667,7 +667,9 @@ namespace Localizer {
 			dest->randerr_conf.value[2] = gnd_deg2ang(dest->randerr_conf.value[2]);
 		}
 
-		gnd::conf::get_parameter(src, &dest->randerr_offset_conf );
+		if( gnd::conf::get_parameter(src, &dest->randerr_offset_conf ) >= 3) {
+			dest->randerr_offset_conf.value[2] = gnd_deg2ang(dest->randerr_offset_conf.value[2]);
+		}
 
 		gnd::conf::get_parameter(src, &dest->syserr_conf );
 		gnd::conf::get_parameter(src, &dest->resmp_rate_syserr2);
