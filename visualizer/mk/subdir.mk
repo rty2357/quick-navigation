@@ -1,0 +1,3 @@
+
+RELEASE_DIR:=release/
+
