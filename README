@@ -1,0 +1,25 @@
+README: urg-proxy
+
+基本的な使用方法について記述
+
+コンパイル
+・依存ライブラリ
+  ssm
+  scip2awd
+
+・以下のコマンドでディレクトリReleaseに実行ファイルを生成
+  $ make
+
+実行
+コンフィグレーションファイルにてデバイスの位置や測距方法が指定できます
+サンプル"urg-dev.conf"をご参照ください
+
+・実行
+  $ odometer -p <port> -d <configuration-file>
+  ※ <port>がurg出会った場合、<configuration-file>の記述から
+     シリアルをもとに位置や測距方法を検索します
+     該当のシリアルについて記述が内場合、デフォルトの値での実行となります
+ 
+・終了
+  ctrl+c (シグナル"SIGINT"の送信)
+ 
