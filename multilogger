@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [ ! -r ./${1} ]; then
+	echo "error: missing configuration file operand"
+	echo "e.g. logger <logger.conf>"
+	return 1
+fi
+
+
+# make log directory
+CUR=`date +"%Y.%m%d-%H%M"`
+WDIR=`pwd`
+
+PARENTDIR=${WDIR}/log
+LOGDIR=${PARENTDIR}/${CUR}
+
+if [ ! -w ${PARENTDIR} ]; then
+	mkdir ${PARENTDIR}
+fi
+
+if [ -e ${LOGDIR} ]; then
+	echo "ERROR: ${LOGDIR} already exists."
+	return 1
+else
+	mkdir ${LOGDIR}
+	echo SSM-logger log ${CUR} > ${LOGDIR}/logger.err
+fi
+
+
+
+while read LINE
+do
+	NAME=`echo ${LINE} | cut -d : -f 1`
+	ID=`echo ${LINE} | cut -d : -f 2`
+	echo ssm-logger -n ${NAME} -i ${ID} -l ${LOGDIR}/${NAME}-${ID}.log 		2>&1 | tee -a ${LOGDIR}/logger.err & 
+	ssm-logger -n ${NAME} -i ${ID} -l ${LOGDIR}/${NAME}-${ID}.log 		2>&1 | tee -a ${LOGDIR}/logger.err &
+done < ${1}	
+
+
