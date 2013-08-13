@@ -17,7 +17,7 @@ std::string strprintf(const char *format, ... )
     char str[256];
 
     va_start(list, format);
-    int size = vsprintf(str, format, list);
+//    int size = vsprintf(str, format, list);
     va_end(list);
 
 		return std::string(str);
@@ -89,12 +89,12 @@ triple polar(double r, double v, double h)
 vector<double> convert_color(const string &str)
 {
 	vector<double> ret(4);
-	for(int i=0; i<min(2*ret.size(),str.size()); i++)
+	for(int i=0; i<(signed)min(2*ret.size(),str.size()); i++)
 	{
 		ret[i/2] *= 16;
 		ret[i/2] += str[i]<'A' ? str[i]-'0' : str[i]-'A'+10;
 	}
-	for(int i=0; i<ret.size(); i++) { ret[i] /= 255; }
+	for(int i=0; i<(signed)ret.size(); i++) { ret[i] /= 255; }
 	if(str.size() <= 6) { ret[3]=1.0; }
 	return ret;
 }

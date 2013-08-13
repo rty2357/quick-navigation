@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <GL/freeglut.h>
 #include "tkgutil.hpp"
+#include "gnd-opsm.hpp"
 using namespace std;
 
 typedef complex<double> point;
@@ -120,7 +121,7 @@ void route_move(int idx)
 void undo_route_move(const Undo &u)
 {
 	int idx = u.data_i[0];
-	if(0<=idx && idx<route.size())
+	if(0<=idx && idx<(signed)route.size())
 	{
 		WayPoint w(0,0);
 		w.f  = u.data_i[1];
@@ -151,7 +152,7 @@ void undo_editmap_move(const Undo &u)
 	int tedit_mode = u.data_i[1];
 	int tedit_file = u.data_i[2];
 	vector<point> &editmap = (tedit_mode==1) ? linemap[tedit_file] : edgemap[tedit_file];
-	if(0<=idx && idx<editmap.size())
+	if(0<=idx && idx<(signed)editmap.size())
 	{
 		editmap[idx] = point(u.data_f[0], u.data_f[1]);
 	}
@@ -211,7 +212,7 @@ void undo_editmap_erase(const Undo &u)
 	int tedit_mode = u.data_i[1];
 	int tedit_file = u.data_i[2];
 	vector<point> &editmap = (tedit_mode==1) ? linemap[tedit_file] : edgemap[tedit_file];
-	if(0<=idx && idx<=editmap.size()) // イテレータはendがあるため<=size
+	if(0<=idx && idx<=(signed)editmap.size()) // イテレータはendがあるため<=size
 	{
 		editmap.insert(editmap.begin() + idx, point(u.data_f[2], u.data_f[3]));
 		editmap.insert(editmap.begin() + idx, point(u.data_f[0], u.data_f[1]));
@@ -241,12 +242,12 @@ void undo()
 vector<double> convert_color(const string &str)
 {
 	vector<double> ret(3);
-	for(int i=0; i<min(2*ret.size(),str.size()); i++)
+	for(int i=0; i<(signed)min(2*ret.size(),str.size()); i++)
 	{
 		ret[i/2] *= 16;
 		ret[i/2] += str[i]<'A' ? str[i]-'0' : str[i]-'A'+10;
 	}
-	for(int i=0; i<ret.size(); i++) { ret[i] /= 255; }
+	for(int i=0; i<(signed)ret.size(); i++) { ret[i] /= 255; }
 	return ret;
 }
 
@@ -303,7 +304,7 @@ void display_route()
 	glBegin(GL_LINE_STRIP);
 	if(edit_mode) glColor3d(0.0, 0.0, 0.3);
 	else          glColor3d(0.0, 0.0, 1.0);
-	for(int i=0; i<spur.size(); i++)
+	for(int i=0; i<(signed)spur.size(); i++)
 	{
 		myVertex(spur[i]);
 	}
@@ -311,7 +312,7 @@ void display_route()
 
 	// route
 	glBegin(GL_LINES);
-	for(int i=1; i<route.size(); i++)
+	for(int i=1; i<(signed)route.size(); i++)
 	{
 
 		glColor3d(0.3, 0.3, 0.3);
@@ -331,7 +332,7 @@ void display_route()
 void display_route_vertex()
 {
 	glBegin(GL_POINTS);
-	for(int i=0; i<route.size(); i++)
+	for(int i=0; i<(signed)route.size(); i++)
 	{
 		glColor3d(1.0, 1.0, 0.0);
 		if(route[i].cp    ) glColor3d(1.0, 0.0, 0.0);
@@ -340,7 +341,7 @@ void display_route_vertex()
 	}
 	glEnd();
 
-	for(int i=0; i<route.size(); i++)
+	for(int i=0; i<(signed)route.size(); i++)
 	{
 		glColor3d(1.0, 1.0, 0.0);
 		if(route[i].cp    ) glColor3d(1.0, 0.0, 0.0);
@@ -357,10 +358,10 @@ void display_route_vertex()
 void display_route_line()
 {
 	glBegin(GL_LINES);
-	for(int i=0; i<linemap.size(); i++)
+	for(int i=0; i<(signed)linemap.size(); i++)
 	{
 		if(disp_line==1) glColor3d(0.7, 0.7, 0.7);
-		for(int j=0; j<linemap[i].size(); j++)
+		for(int j=0; j<(signed)linemap[i].size(); j++)
 		{
 			myVertex(linemap[i][j]);
 		}
@@ -371,10 +372,10 @@ void display_route_line()
 void display_route_edge()
 {
 	glBegin(GL_LINES);
-	for(int i=0; i<edgemap.size(); i++)
+	for(int i=0; i<(signed)edgemap.size(); i++)
 	{
 		if(disp_edge==1) glColor3d(0.7, 0.7, 0.7);
-		for(int j=0; j<edgemap[i].size(); j++)
+		for(int j=0; j<(signed)edgemap[i].size(); j++)
 		{
 			myVertex(edgemap[i][j]);
 		}
@@ -386,7 +387,7 @@ void display_edit_line()
 {
 	glColor3d(0.0, 0.5, 0.5);
 	glBegin(GL_LINES);
-	for(int i=0; i<linemap.size(); i++)
+	for(int i=0; i<(signed)linemap.size(); i++)
 	{
 		bool target = (edit_mode==1 && edit_file==i);
 		if(disp_line==0 && !target) continue;
@@ -394,7 +395,7 @@ void display_edit_line()
 		if(target) glColor3d(1.0, 0.0, 1.0);
 		else if(disp_line==1) glColor3d(1.0, 1.0, 1.0);
 		else if(disp_line==2) glColor3d(0.0, 1.0, 1.0);
-		for(int j=0; j<linemap[i].size(); j++)
+		for(int j=0; j<(signed)linemap[i].size(); j++)
 		{
 			myVertex(linemap[i][j]);
 		}
@@ -405,7 +406,7 @@ void display_edit_line()
 void display_edit_edge()
 {
 	glBegin(GL_LINES);
-	for(int i=0; i<edgemap.size(); i++)
+	for(int i=0; i<(signed)edgemap.size(); i++)
 	{
 		bool target = (edit_mode==2 && edit_file==i);
 		if(disp_edge==0 && !target) continue;
@@ -414,7 +415,7 @@ void display_edit_edge()
 		else if(disp_edge==1) glColor3d(1.0, 1.0, 1.0);
 		else if(disp_edge==2) glColor3d(0.0, 1.0, 0.0);
 
-		for(int j=0; j<edgemap[i].size(); j++)
+		for(int j=0; j<(signed)edgemap[i].size(); j++)
 		{
 			myVertex(edgemap[i][j]);
 		}
@@ -426,7 +427,7 @@ void display_edit_vertex()
 {
 	vector<point> &editmap = (edit_mode==1) ? linemap[edit_file] : edgemap[edit_file];
 	glBegin(GL_POINTS);
-	for(int i=0; i<editmap.size(); i++)
+	for(int i=0; i<(signed)editmap.size(); i++)
 	{
 		glColor3d(1.0, 0.0, 1.0);
 		myVertex(editmap[i]);
@@ -439,7 +440,7 @@ void display_gridmap()
 {
 
 	glBegin(GL_POINTS);
-	for(int i=0; i<gridmap.size(); i++)
+	for(int i=0; i<(signed)gridmap.size(); i++)
 	{
 		double val = gridval[i] / 255.0;
 		glColor3d(val, val, val);
@@ -507,7 +508,7 @@ void cmdAnalyze()
 			if(sin >> str)
 			{
 				int t = atoi(str.c_str());
-				if(0<=t && t<route.size())
+				if(0<=t && t<(signed)route.size())
 				{
 					route.erase(route.begin()+t);
 				}
@@ -518,7 +519,7 @@ void cmdAnalyze()
 			if(sin >> str)
 			{
 				int t = atoi(str.c_str());
-				if(1<=t && t<route.size())
+				if(1<=t && t<(signed)route.size())
 				{
 					point pos = (route[t-1].p + route[t].p)/2.0;
 					route.insert(route.begin()+t, WayPoint('A',pos));
@@ -534,7 +535,7 @@ void cmdAnalyze()
 			if(sin >> str)
 			{
 				int t = atoi(str.c_str());
-				if(0<=t && t<route.size()) route[t].f = 'A';
+				if(0<=t && t<(signed)route.size()) route[t].f = 'A';
 			}
 		}
 		else if(str=="stop")
@@ -542,7 +543,7 @@ void cmdAnalyze()
 			if(sin >> str)
 			{
 				int t = atoi(str.c_str());
-				if(0<=t && t<route.size()) route[t].f = 'C';
+				if(0<=t && t<(signed)route.size()) route[t].f = 'C';
 			}
 		}
 		else if(str=="goal")
@@ -550,7 +551,7 @@ void cmdAnalyze()
 			if(sin >> str)
 			{
 				int t = atoi(str.c_str());
-				if(0<=t && t<route.size()) route[t].f = 'E';
+				if(0<=t && t<(signed)route.size()) route[t].f = 'E';
 			}
 		}
 		else if(str=="odm" || str=="line" || str=="edge" || str=="both")
@@ -560,7 +561,7 @@ void cmdAnalyze()
 			{
 				int s = atoi(str1.c_str());
 				int t = atoi(str2.c_str());
-				if(0<=s && s<route.size() && 0<=t && t<route.size())
+				if(0<=s && s<(signed)route.size() && 0<=t && t<(signed)route.size())
 				{
 					int val = 0;
 					if(str=="odm" ) val=0;
@@ -576,7 +577,7 @@ void cmdAnalyze()
 			if(sin >> str)
 			{
 				int t = atoi(str.c_str());
-				if(0<=t && t<route.size()) route[t].cp = !route[t].cp;
+				if(0<=t && t<(signed)route.size()) route[t].cp = !route[t].cp;
 			}
 		}
 	}
@@ -593,7 +594,7 @@ void cmdAnalyze()
 		fout.open( (map_path+map_name+"keiro.dat").c_str() );
 		if(fout)
 		{
-			for(int i=0; i<route.size(); i++)
+			for(int i=0; i<(signed)route.size(); i++)
 			{
 				fout << route[i].f << " " << route[i].p.real() << " " << route[i].p.imag() << endl;
 			}
@@ -632,7 +633,7 @@ void keyboard(unsigned char key, int x, int y)
 void mouse_route(int button, int state, point pos)
 {
 	double mindist=1e10;
-	for(int i=0; i<route.size(); i++)
+	for(int i=0; i<(signed)route.size(); i++)
 	{
 		double dist = abs(pos-route[i].p);
 		if(dist < select_radius/scale)
@@ -658,7 +659,7 @@ void mouse_edit(int button, int state, point pos)
 {
 	double mindist=1e10;
 	vector<point> &editmap = (edit_mode==1) ? linemap[edit_file] : edgemap[edit_file];
-	for(int i=0; i<editmap.size(); i++)
+	for(int i=0; i<(signed)editmap.size(); i++)
 	{
 		double dist = abs(pos-editmap[i]);
 		if(dist < select_radius/scale)
@@ -717,7 +718,7 @@ void mouse(int button, int state, int x, int y)
 
 void motion_route(point pos)
 {
-	if(0<=select_idx && select_idx<route.size())
+	if(0<=select_idx && select_idx<(signed)route.size())
 	{
 		route[select_idx].p = pos;
 	}
@@ -728,7 +729,7 @@ void motion_route(point pos)
 void motion_edit(point pos)
 {
 	vector<point> &editmap = (edit_mode==1) ? linemap[edit_file] : edgemap[edit_file];
-	if(0<=select_idx && select_idx<editmap.size())
+	if(0<=select_idx && select_idx<(signed)editmap.size())
 	{
 		editmap[select_idx] = pos;
 	}
@@ -810,6 +811,9 @@ bool optAnalyze(int argc, char **argv)
 	string map_path;
 	ifstream fin("path.conf");
 	fin >> map_path;
+	if(map_path.size() > 0){
+		map_path = map_path +  "/";
+	}
 	fin.close();
 
 	while((opt = getopt(argc, argv, "m:h")) != -1)
@@ -840,6 +844,9 @@ void loadconfig()
 	ifstream fin("path.conf");
 	if(fin) {
 		fin >> map_path;
+		if(map_path.size() > 0){
+			map_path = map_path +  "/";
+		}
 		fin.close();
 	}
 }
@@ -854,7 +861,7 @@ int main(int argc, char **argv)
 	{
 		cout << "Map: " << map_path << map_name << endl;
 
-		char fn[256];
+//		char fn[256];
 		ifstream fin;
 		//point pmax(-1e10),pmin(+1e10);
 		point pmax(1e1),pmin(-1e1);
@@ -887,49 +894,45 @@ int main(int argc, char **argv)
 			fin.close();
 		}
 
-		double base_x, base_y;
-		fin.open((map_path+map_name+"out8.origin.txt").c_str());
-		if(fin)
-		{
-			fin >> base_x >> base_y;
-			fin.close();
-			cout << "base (" << base_x << "," << base_y << ")" << endl;
-		}
+		{ // ---> read opsm map
+			gnd::opsm::cmap_t			cnt_smmap;			// probabilistic scan matching counting map
+			gnd::opsm::map_t			smmap;				// probabilistic scan matching map
+			gnd::bmp8_t bmp8;
 
-		fin.open((map_path+map_name+"out8.bmp").c_str(), ios::in|ios::binary);
-		if(fin)
-		{
-			int offset,bmpwid,bmphei,divwid,divhei;
-			fin.seekg( 10, ios::beg );
-			fin.read((char*)(&offset), sizeof(offset));
-			fin.seekg( 18, ios::beg );
-			fin.read((char*)(&bmpwid), sizeof(bmpwid));
-			fin.read((char*)(&bmphei), sizeof(bmphei));
-			fin.seekg( 38, ios::beg );
-			fin.read((char*)(&divwid), sizeof(divwid));
-			fin.read((char*)(&divhei), sizeof(divhei));
-			fin.seekg( offset, ios::beg );
+			::fprintf(stderr, "\n");
+			::fprintf(stderr, " => load scan matching map from \"\x1b[4m%s\x1b[0m\"\n", (map_path+map_name+"opsm-map").c_str());
+			if( gnd::opsm::read_counting_map(&cnt_smmap, (map_path+map_name+"opsm-map").c_str()) < 0){
+				::fprintf(stderr, "  ... \x1b[1m\x1b[31mERROR\x1b[39m\x1b[0m: fail to load scan matching map \"\x1b[4m%s\x1b[0m\"\n", (map_path+map_name+"opsm-map").c_str());
+			}
+			else if( gnd::opsm::build_map(&smmap, &cnt_smmap, gnd_mm2dist(1)) < 0) {
+				::fprintf(stderr, "  ... \x1b[1m\x1b[31mERROR\x1b[39m\x1b[0m: fail to build scan matching map \"\x1b[4m%s\x1b[0m\"\n", (map_path+map_name+"opsm-map").c_str());
+			}
+			else if (gnd::opsm::build_bmp8(&bmp8, &smmap, gnd_m2dist( 1.0 / 32)) < 0) {
+				::fprintf(stderr, "  ... \x1b[1mOK\x1b[0m: load scan matching map \"\x1b[4m%s\x1b[0m\"\n", (map_path+map_name+"opsm-map").c_str());
+			}
 
-			int bmpstep = bmpwid % 4;
-			if(bmpstep) bmpstep = 4-bmpstep;
-
-			for(int y=0; y<bmphei; y++)
+			for(unsigned int y=0; y<bmp8.row(); y++)
 			{
-				for(int x=0; x<bmpwid; x++)
+				for(unsigned int x=0; x<bmp8.column(); x++)
 				{
-					int lv = fin.get();
+					unsigned char v;
+					int lv;
+					bmp8.get(y,x,&v);
+					lv = v;
 					if(lv) {
-						double px = base_x + 1.0*x/divwid;
-						double py = base_y + 1.0*y/divhei;
+						double px;
+						double py;
+						bmp8.pget_pos_core(y,x, &px, &py);
 						point pt(px, py);
 						gridmap.push_back( pt );
 						gridval.push_back( lv );
 					}
 				}
-				for(int x=0; x<bmpstep; x++) fin.get();
 			}
-			fin.close();
-		}
+
+		} // <--- read opsm map
+
+
 	}
 
 	glutInit(&argc, argv);

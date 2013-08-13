@@ -6,7 +6,7 @@ WORKSPACE			:=$(dir $(patsubst %/,%,$(PWD)) )
 SRCS_DIR			:=src/
 
 # search header directory (relative directory path from workspace)
-HEADER_DIR_LIST		:=
+HEADER_DIR_LIST		:=gndlib
 
 # search header directory (relative directory path from workspace)
 LIB_DIR_LIST		:=
