@@ -1,12 +1,32 @@
 
 #launcher shell script name
-LAUNCHER		:=launcher
+LAUNCHER			:=launcher
+
+#launcher shell script name
+LAUNCHER_INC		:=launcher.opt
+
+#lanch option tag
+LAUNCH_OPTION_TAG	:=OPTION
 
 #lanch option
-LAUNCH_OPTION	:=-g ./ysd-path-planner.conf -f ../map/tmp/keiro.dat
+LAUNCH_OPTION:=
 
 #launch command
-LAUNCH_CMD		:=./$(RELEASE_DIR)$(TARGET) $(LAUNCH_OPTION) "$$"@
+LAUNCH_CMD = \
+echo ./$(RELEASE_DIR)$(TARGET) \$${$(LAUNCH_OPTION_TAG)} \$$@\n\
+./$(RELEASE_DIR)$(TARGET) \$${$(LAUNCH_OPTION_TAG)} \$$@
 
 #shell command interpreter
-SHELL_INTRP		:=/bin/bash
+SHELL_INTRP			:=/bin/bash
+
+define make-launcher
+	@$(shell) echo -e "#!$(SHELL_INTRP)" > $(LAUNCHER)
+	@$(shell) echo -e ". $(LAUNCHER_INC)" >> $(LAUNCHER)
+	@$(shell) echo -e "$(LAUNCH_CMD)" >> $(LAUNCHER)
+	@chmod +x $(LAUNCHER)
+	@$(shell) echo -e "create launcher"
+endef
+
+define clean-launcher
+	$(REMOVE) $(LAUNCHER)
+endef

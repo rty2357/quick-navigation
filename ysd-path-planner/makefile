@@ -1,5 +1,6 @@
 
 TARGET	:=$(notdir $(patsubst %/,%,$(PWD)) )
+SHELL	:=bash
 GCC		:=g++
 REMOVE	:=rm -rf
 MAKEDIR	:=mkdir -p
@@ -36,20 +37,19 @@ all:rebuild
 
 build:$(RELEASE_DIR) $(OBJS)
 	$(GCC) -o"$(RELEASE_DIR)$(TARGET)" $(patsubst %,$(RELEASE_DIR)%,$(OBJS)) $(LDFLAGS)
-	@echo "#!$(SHELL_INTRP)" > $(LAUNCHER)
-	@echo "$(LAUNCH_CMD)" >> $(LAUNCHER)
-	@chmod +x $(LAUNCHER)
-	@echo "create launcher"
+	$(make-launcher)
 
 rebuild:clean build
 
 debug:rebuild
 
 clean:
-	$(REMOVE) $(patsubst %,$(RELEASE_DIR)%,$(OBJS)) $(RELEASE_DIR)$(TARGET) $(LAUNCHER)
+	$(REMOVE) $(patsubst %,$(RELEASE_DIR)%,$(OBJS)) $(RELEASE_DIR)$(TARGET)
+	$(clean-launcher)
 
 clean-debug:
-	$(REMOVE) $(RELEASE_DIR) $(LAUNCHER)
+	$(REMOVE) $(RELEASE_DIR)
+	$(clean-launcher)
 
 .cpp.o:
 	g++ $(CFLAGS) -c $< -o $(RELEASE_DIR)$@
