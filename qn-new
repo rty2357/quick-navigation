@@ -1,0 +1,104 @@
+#!/bin/bash
+. .quick-navigation
+
+if [ $# -ne 1 ]; then
+	echo "Usage: $0 <new-map's-name>"
+	echo "e.g.) $0 my-room"
+	exit 1
+fi
+
+
+_TEMPLATE_DIR_=${_DATA_DIR_}/.template
+
+_NEW_MAP_DIR_=${_DATA_DIR_}/${1}
+
+
+if [ -d ${_NEW_MAP_DIR_} ]; then
+	echo "Error: $1 already exists"
+	exit 1
+fi
+
+
+mkdir ${_NEW_MAP_DIR_}
+if [ $? -eq 0 ]; then
+	echo "make new map data directory ${_NEW_MAP_DIR_}"
+else
+	echo "fail to make directory ${_NEW_MAP_DIR_}"
+	exit 1
+fi
+
+
+# opsm-position-tracker.conf
+_flg_pt_output_dir_=0
+_conf_pt_output_dir_=file-output-directory
+_flg_pt_opsm_map_=0
+_conf_pt_opsm_map_=opsm-map
+touch ${_NEW_MAP_DIR_}/${_P_TRACKER_CONF_}
+cat ${_TEMPLATE_DIR_}/${_P_TRACKER_CONF_} | while read line
+do
+	_line_pt_output_dir_=`echo "$line" | grep "${_conf_pt_output_dir_}" | wc -l`
+	_line_pt_opsm_map_=`echo "$line" | grep "${_conf_pt_opsm_map_}" | wc -l`
+	if [ ${_flg_pt_output_dir_} -eq 0 -a ${_line_pt_output_dir_} -eq 1 ]; then
+		echo "${_conf_pt_output_dir_} = ../${_NEW_MAP_DIR_}" >> ${_NEW_MAP_DIR_}/${_P_TRACKER_CONF_}
+		_flg_pt_output_dir_=1
+	elif [ ${_flg_pt_opsm_map_} -eq 0 -a ${_line_pt_opsm_map_} -eq 1 ]; then
+		echo "${_conf_pt_opsm_map_} = opsm-map" >> ${_NEW_MAP_DIR_}/${_P_TRACKER_CONF_}
+		_flg_pt_opsm_map_=1
+	else 
+		echo "${line}" >> ${_NEW_MAP_DIR_}/${_P_TRACKER_CONF_}
+	fi
+done
+
+
+# opsm-particle-evaluator.conf
+_flg_pe_map_dir_=0
+_conf_pe_map_dir_=cnt-map-dir
+touch ${_NEW_MAP_DIR_}/${_P_EVALUATOR_CONF_}
+cat ${_TEMPLATE_DIR_}/${_P_EVALUATOR_CONF_} | while read line
+do
+	_line_pe_map_dir_=`echo "$line" | grep "${_conf_pe_map_dir_}" | wc -l`
+	if [ ${_flg_pe_map_dir_} -eq 0 -a ${_line_pe_map_dir_} -eq 1 ]; then
+		echo "${_conf_pe_map_dir_} = ../${_NEW_MAP_DIR_}/opsm-map" >> ${_NEW_MAP_DIR_}/${_P_EVALUATOR_CONF_}
+		_flg_pe_map_dir_=1
+	else 
+		echo "${line}" >> ${_NEW_MAP_DIR_}/${_P_EVALUATOR_CONF_}
+	fi
+done
+
+
+# particle-localizer.conf
+touch ${_NEW_MAP_DIR_}/${_LOCLIZER_CONF_}
+cat ${_TEMPLATE_DIR_}/${_LOCLIZER_CONF_} | while read line
+do
+	echo "${line}" >> ${_NEW_MAP_DIR_}/${_LOCLIZER_CONF_}
+done
+
+# ysd-path-planner.conf
+touch ${_NEW_MAP_DIR_}/${_PATH_PLAN_CONF_}
+cat ${_TEMPLATE_DIR_}/${_PATH_PLAN_CONF_} | while read line
+do
+	echo "${line}" >> ${_NEW_MAP_DIR_}/${_PATH_PLAN_CONF_}
+done
+# ysd-path-planner.opt
+touch ${_NEW_MAP_DIR_}/${_PATH_PLAN_OPT_}
+echo -e "OPTION=\"-g ./${_PATH_PLAN_CONF_} -f ../${_NEW_MAP_DIR_}/keiro.dat -s\"" >> ${_NEW_MAP_DIR_}/${_PATH_PLAN_OPT_}
+
+# tkg-route-editor/path.conf
+touch ${_NEW_MAP_DIR_}/${_ROUTE_EDITOR_CONF_}
+echo -e -n "../${_DATA_DIR_}\n" >> ${_NEW_MAP_DIR_}/${_ROUTE_EDITOR_CONF_}
+# tkg-route-editor.opt
+touch ${_NEW_MAP_DIR_}/${_ROUTE_EDITOR_OPT_}
+echo -e "OPTION=\"-m ${1}\"\n" >> ${_NEW_MAP_DIR_}/${_ROUTE_EDITOR_OPT_}
+
+# visualizer.conf
+touch ${_NEW_MAP_DIR_}/${_VISUALIZER_CONF_}
+echo "../${_NEW_MAP_DIR_}/opsm-map" >> ${_NEW_MAP_DIR_}/${_VISUALIZER_CONF_}
+
+# tkg-route-editor/path.conf
+cp ${_TEMPLATE_DIR_}/${_LS_CCONVERTER_CONF_} ${_NEW_MAP_DIR_}/
+# tkg-route-editor.opt
+touch ${_NEW_MAP_DIR_}/${_LS_CCONVERTER_OPT_}
+echo -e "OPTION=\"-g ${_LS_CCONVERTER_CONF_}\"\n" >> ${_NEW_MAP_DIR_}/${_LS_CCONVERTER_OPT_}
+
+./qn-open ${_NEW_MAP_DIR_}
+

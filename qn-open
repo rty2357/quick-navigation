@@ -1,0 +1,100 @@
+#!/bin/bash
+. .quick-navigation
+
+if [ $# -ne 1 ]; then
+	echo "Usage: $0 <map's-name>"
+	echo "e.g.) $0 my-room"
+	exit 1
+fi
+
+_MAP_DIR_=${1}
+_LAUNCHER_OPT_=launcher.opt
+
+# opsm-position-tracker
+if [ -f ${_MAP_DIR_}/${_P_TRACKER_CONF_} ]; then
+	cp ${_MAP_DIR_}/${_P_TRACKER_CONF_} ${_P_TRACKER_DIR_}/
+	echo "${_P_TRACKER_DIR_}/${_P_TRACKER_CONF_} ... ok"
+else 
+	echo "Error: ${_MAP_DIR_}/${_P_TRACKER_CONF_} is not exist"
+	exit 1
+fi
+
+# opsm-particle-evaluator
+if [ -f ${_MAP_DIR_}/${_P_EVALUATOR_CONF_} ]; then
+	cp ${_MAP_DIR_}/${_P_EVALUATOR_CONF_} ${_P_EVALUATOR_DIR_}/
+	echo "${_P_EVALUATOR_DIR_}/${_P_EVALUATOR_CONF_} ... ok"
+else 
+	echo "Error: ${_MAP_DIR_}/${_P_EVALUATOR_CONF_} is not exist"
+	exit 1
+fi
+
+# particle-localizer
+if [ -f ${_MAP_DIR_}/${_LOCLIZER_CONF_} ]; then
+	cp ${_MAP_DIR_}/${_LOCLIZER_CONF_} ${_LOCLIZER_DIR_}/
+	echo "${_LOCLIZER_DIR_}/${_LOCLIZER_CONF_} ... ok"
+else 
+	echo "Error: ${_MAP_DIR_}/${_LOCLIZER_CONF_} is not exist"
+	exit 1
+fi
+
+# path-planner
+if [ -f ${_MAP_DIR_}/${_PATH_PLAN_CONF_} ]; then
+	cp ${_MAP_DIR_}/${_PATH_PLAN_CONF_} ${_PATH_PLAN_DIR_}/
+	echo "${_PATH_PLAN_DIR_}/${_PATH_PLAN_CONF_} ... ok"
+else 
+	echo "Error: ${_MAP_DIR_}/${_PATH_PLAN_CONF_} is not exist"
+	exit 1
+fi
+if [ -f ${_MAP_DIR_}/${_PATH_PLAN_OPT_} ]; then
+	cp ${_MAP_DIR_}/${_PATH_PLAN_OPT_} ${_PATH_PLAN_DIR_}/${_LAUNCHER_OPT_}
+	echo "${_PATH_PLAN_DIR_}/${_LAUNCHER_OPT_} ... ok"
+else 
+	echo "Error: ${_MAP_DIR_}/${_PATH_PLAN_OPT_} is not exist"
+	exit 1
+fi
+
+
+# route-editor
+if [ -f ${_MAP_DIR_}/${_ROUTE_EDITOR_CONF_} ]; then
+	cp ${_MAP_DIR_}/${_ROUTE_EDITOR_CONF_} ${_ROUTE_EDITOR_DIR_}/
+	echo "${_ROUTE_EDITOR_DIR_}/${_ROUTE_EDITOR_CONF_} ... ok"
+else 
+	echo "Error: ${_MAP_DIR_}/${_ROUTE_EDITOR_CONF_} is not exist"
+	exit 1
+fi
+if [ -f ${_MAP_DIR_}/${_ROUTE_EDITOR_OPT_} ]; then
+	cp ${_MAP_DIR_}/${_ROUTE_EDITOR_OPT_} ${_ROUTE_EDITOR_DIR_}/${_LAUNCHER_OPT_}
+	echo "${_ROUTE_EDITOR_DIR_}/${_LAUNCHER_OPT_} ... ok"
+else 
+	echo "Error: ${_MAP_DIR_}/${_ROUTE_EDITOR_OPT_} is not exist"
+	exit 1
+fi
+
+# visualizer
+if [ -f ${_MAP_DIR_}/${_VISUALIZER_CONF_} ]; then
+	cp ${_MAP_DIR_}/${_VISUALIZER_CONF_} ${_VISUALIZER_DIR_}/
+	echo "${_VISUALIZER_DIR_}/${_VISUALIZER_CONF_} ... ok"
+else 
+	echo "Error: ${_MAP_DIR_}/${_VISUALIZER_CONF_} is not exist"
+	exit 1
+fi
+
+
+
+# ls-coordinate-converter
+if [ -f ${_MAP_DIR_}/${_LS_CCONVERTER_CONF_} ]; then
+	cp ${_MAP_DIR_}/${_LS_CCONVERTER_CONF_} ${_LS_CCONVERTER_DIR_}/
+	echo "${_LS_CCONVERTER_DIR_}/${_LS_CCONVERTER_CONF_} ... ok"
+else 
+	echo "Error: ${_MAP_DIR_}/${_LS_CCONVERTER_CONF_} is not exist"
+fi
+if [ -f ${_MAP_DIR_}/${_LS_CCONVERTER_OPT_} ]; then
+	cp ${_MAP_DIR_}/${_LS_CCONVERTER_OPT_} ${_LS_CCONVERTER_DIR_}/${_LAUNCHER_OPT_}
+	echo "${_LS_CCONVERTER_DIR_}/${_LAUNCHER_OPT_} ... ok"
+else 
+	echo "Error: ${_MAP_DIR_}/${_LS_CCONVERTER_OPT_} is not exist"
+fi
+
+
+echo "open ${_MAP_DIR_}"
+
