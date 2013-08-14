@@ -59,7 +59,9 @@ bool ViewerSSM::init()
     if(ssm = initSSM())
     {
         emit send_message("SSMへの接続に成功しました。\n");
-        glpos.open("spur_odometry", 0);
+        if( !glpos.open("spur_adjust", 0) ) {
+	        glpos.open("spur_odometry", 0);
+	}
 
         for(int i=0; i<ssmlist.size(); i++)
         {
