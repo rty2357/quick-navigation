@@ -478,23 +478,16 @@ namespace Localizer {
 		gnd_assert(!conf, -1, "invalid null pointer");
 
 		gnd::matrix::set_unit( &conf->poserr_cover_ini );
-		for(size_t i = 0; i < 2; i++)
-			gnd::matrix::set(&conf->poserr_cover_ini, i, i, gnd_square( conf->pos_err_ini.value[i] ) );
-		gnd::matrix::set(&conf->poserr_cover_ini, 2, 2, gnd_square( gnd_deg2ang( conf->pos_err_ini.value[2] ) ) );
-
-		gnd::matrix::set_unit( &conf->syserr_cover_ini );
 		for(size_t i = 0; i < 3; i++)
-			gnd::matrix::set(&conf->syserr_cover_ini, i, i, gnd_square( conf->sys_err_ini.value[i] ) );
+			gnd::matrix::set(&conf->poserr_cover_ini, i, i, gnd_square( conf->pos_err_ini.value[i] ) );
 
 		gnd::matrix::set_unit( &conf->randerr_covar );
-		for(size_t i = 0; i < 2; i++)
+		for(size_t i = 0; i < 3; i++)
 			gnd::matrix::set(&conf->randerr_covar, i, i, gnd_square( conf->randerr_conf.value[i] ) );
-		gnd::matrix::set(&conf->randerr_covar, 2, 2, gnd_square( gnd_deg2ang( conf->randerr_conf.value[2] ) ) );
 
 		gnd::matrix::set_unit( &conf->randerr_covar_offset );
-		for(size_t i = 0; i < 2; i++)
+		for(size_t i = 0; i < 3; i++)
 			gnd::matrix::set(&conf->randerr_covar_offset, i, i, gnd_square( conf->randerr_offset_conf.value[i] ) );
-		gnd::matrix::set(&conf->randerr_covar_offset, 2, 2, gnd_square( gnd_deg2ang( conf->randerr_offset_conf.value[2] ) ) );
 
 		return 0;
 	}
@@ -559,15 +552,15 @@ namespace Localizer {
 			gnd::matrix::set_unit(&conf->syserr_cover_ini);
 			if( !conf->gyro.value ){
 				gnd::matrix::set(&conf->syserr_cover_ini, 0, 0,
-						gnd_square( conf->sys_err_ini.value[0] * gnd_square(wheel_mean) )  );
+						gnd_square( conf->sys_err_ini.value[0] * wheel_mean )  );
 				gnd::matrix::set(&conf->syserr_cover_ini, 1, 1,
-						gnd_square( conf->sys_err_ini.value[1] * gnd_square(wheel_ratio) )  );
+						gnd_square( conf->sys_err_ini.value[1] * wheel_ratio )  );
 				gnd::matrix::set(&conf->syserr_cover_ini, 2, 2,
-						gnd_square( conf->sys_err_ini.value[2] * gnd_square(tread_ratio) )  );
+						gnd_square( conf->sys_err_ini.value[2] * tread_ratio )  );
 			}
 			else {
 				gnd::matrix::set(&conf->syserr_cover_ini, 0, 0,
-						gnd_square( conf->sys_err_ini.value[0] * gnd_square(wheel_mean) )  );
+						gnd_square( conf->sys_err_ini.value[0] * wheel_mean )  );
 				gnd::matrix::set(&conf->syserr_cover_ini, 1, 1,
 						gnd_square( conf->sys_err_ini.value[1] * conf->gyro_bias.value )  );
 				gnd::matrix::set(&conf->syserr_cover_ini, 2, 2,
@@ -579,35 +572,36 @@ namespace Localizer {
 			gnd::matrix::set_unit(&conf->syserr_cover);
 			if( !conf->gyro.value ){
 				gnd::matrix::set(&conf->syserr_cover, 0, 0,
-						gnd_square( conf->syserr_conf.value[0] * gnd_square(wheel_mean) )  );
+						gnd_square( conf->syserr_conf.value[0] * wheel_mean )  );
 				gnd::matrix::set(&conf->syserr_cover, 1, 1,
-						gnd_square( conf->syserr_conf.value[1] * gnd_square(wheel_ratio) )  );
+						gnd_square( conf->syserr_conf.value[1] * wheel_ratio )  );
 				gnd::matrix::set(&conf->syserr_cover, 2, 2,
-						gnd_square( conf->syserr_conf.value[2] * gnd_square(tread_ratio) )  );
+						gnd_square( conf->syserr_conf.value[2] * tread_ratio )  );
 			}
 			else {
 				gnd::matrix::set(&conf->syserr_cover, 0, 0,
-						gnd_square( conf->syserr_conf.value[0] * gnd_square(wheel_mean) )  );
+						gnd_square( conf->syserr_conf.value[0] * wheel_mean )  );
 				gnd::matrix::set(&conf->syserr_cover, 1, 1,
 						gnd_square( conf->syserr_conf.value[1] * conf->gyro_bias.value )  );
 				gnd::matrix::set(&conf->syserr_cover, 2, 2,
 						gnd_square( conf->syserr_conf.value[2] * conf->gyro_sf.value )  );
 			}
+
 		} // <--- resampleing for systematic error
 
 		{ // ---> resampleing for systematic error
 			gnd::matrix::set_unit(&conf->syserr2_covar);
 			if( !conf->gyro.value ){
 				gnd::matrix::set(&conf->syserr2_covar, 0, 0,
-						gnd_square( conf->syserr2_conf.value[0] * gnd_square(wheel_mean) )  );
+						gnd_square( conf->syserr2_conf.value[0] * wheel_mean )  );
 				gnd::matrix::set(&conf->syserr2_covar, 1, 1,
-						gnd_square( conf->syserr2_conf.value[1] * gnd_square(wheel_ratio) )  );
+						gnd_square( conf->syserr2_conf.value[1] * wheel_ratio )  );
 				gnd::matrix::set(&conf->syserr2_covar, 2, 2,
-						gnd_square( conf->syserr2_conf.value[2] * gnd_square(tread_ratio) )  );
+						gnd_square( conf->syserr2_conf.value[2] * tread_ratio )  );
 			}
 			else {
 				gnd::matrix::set(&conf->syserr2_covar, 0, 0,
-						gnd_square( conf->syserr2_conf.value[0] * gnd_square(wheel_mean) )  );
+						gnd_square( conf->syserr2_conf.value[0] * wheel_mean )  );
 				gnd::matrix::set(&conf->syserr2_covar, 1, 1,
 						gnd_square( conf->syserr2_conf.value[1] * conf->gyro_bias.value )  );
 				gnd::matrix::set(&conf->syserr2_covar, 2, 2,
@@ -619,15 +613,15 @@ namespace Localizer {
 			gnd::matrix::set_unit(&conf->reset_syserr_covar);
 			if( !conf->gyro.value ){
 				gnd::matrix::set(&conf->reset_syserr_covar, 0, 0,
-						gnd_square( conf->reset_syserr_conf.value[0] * gnd_square(wheel_mean) )  );
+						gnd_square( conf->reset_syserr_conf.value[0] * wheel_mean )  );
 				gnd::matrix::set(&conf->reset_syserr_covar, 1, 1,
-						gnd_square( conf->reset_syserr_conf.value[1] * gnd_square(wheel_ratio) )  );
+						gnd_square( conf->reset_syserr_conf.value[1] * wheel_ratio )  );
 				gnd::matrix::set(&conf->reset_syserr_covar, 2, 2,
-						gnd_square( conf->reset_syserr_conf.value[2] * gnd_square(tread_ratio) )  );
+						gnd_square( conf->reset_syserr_conf.value[2] * tread_ratio )  );
 			}
 			else {
 				gnd::matrix::set(&conf->reset_syserr_covar, 0, 0,
-						gnd_square( conf->reset_syserr_conf.value[0] * gnd_square(wheel_mean) )  );
+						gnd_square( conf->reset_syserr_conf.value[0] * wheel_mean )  );
 				gnd::matrix::set(&conf->reset_syserr_covar, 1, 1,
 						gnd_square( conf->reset_syserr_conf.value[1] * conf->gyro_bias.value )  );
 				gnd::matrix::set(&conf->reset_syserr_covar, 2, 2,

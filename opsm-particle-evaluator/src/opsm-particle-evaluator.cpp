@@ -92,10 +92,10 @@ int main(int argc, char *argv[], char **env) {
 				::fprintf(stderr, " ... \x1b[1m\x1b[31mERROR\x1b[39m\x1b[0m: fail to read map data\n");
 			}
 			else {
-				if( gnd::opsm::build_map(&opsm_map, &cnt_map, gnd_mm2dist(1)) < 0 ) {
+				if( gnd::opsm::build_map(&opsm_map, &cnt_map, gnd_mm2dist(100), 3) < 0 ) {
 					::fprintf(stderr, " ... \x1b[1m\x1b[31mERROR\x1b[39m\x1b[0m: fail to build map\n");
 				}
-				else if( gnd::opsm::build_bmp32(&map, &opsm_map, gnd_m2dist( 1.0 / 20)) < 0 ) {
+				else if( gnd::opsm::build_bmp32(&map, &opsm_map, gnd_m2dist( 1.0 / 50)) < 0 ) {
 					::fprintf(stderr, " ... \x1b[1m\x1b[31mERROR\x1b[39m\x1b[0m: fail to convert bmp\n");
 				}
 				else {

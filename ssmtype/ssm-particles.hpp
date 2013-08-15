@@ -240,12 +240,12 @@ inline int POSITION_PARTICLE_SET_CLASS::init_particle( MTRX1 *myu, MTRX2 *sigmap
 			pos.prop.wheel_odm.tread_ratio += rnd[0][PARTICLE_TREAD_RATIO];
 		}
 
-		pos.odo.x /= n;
-		pos.odo.y /= n;
-		pos.odo.theta /= n;
-		pos.prop.wheel_odm.wheel_mean /= n;
-		pos.prop.wheel_odm.wheel_ratio /= n;
-		pos.prop.wheel_odm.tread_ratio /= n;
+		pos.odo.x /= (n - 1);
+		pos.odo.y /= (n - 1);
+		pos.odo.theta /= (n - 1);
+		pos.prop.wheel_odm.wheel_mean /= (n - 1);
+		pos.prop.wheel_odm.wheel_ratio /= (n - 1);
+		pos.prop.wheel_odm.tread_ratio /= (n - 1);
 	}
 
 //	_n = n;
