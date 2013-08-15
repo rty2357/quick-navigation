@@ -92,10 +92,10 @@ int main(int argc, char *argv[], char **env) {
 				::fprintf(stderr, " ... \x1b[1m\x1b[31mERROR\x1b[39m\x1b[0m: fail to read map data\n");
 			}
 			else {
-				if( gnd::opsm::build_map(&opsm_map, &cnt_map, gnd_mm2dist(100), 3) < 0 ) {
+				if( gnd::opsm::build_map(&opsm_map, &cnt_map, pconf.blur.value, pconf.scan_range.value) < 0 ) {
 					::fprintf(stderr, " ... \x1b[1m\x1b[31mERROR\x1b[39m\x1b[0m: fail to build map\n");
 				}
-				else if( gnd::opsm::build_bmp32(&map, &opsm_map, gnd_m2dist( 1.0 / 50)) < 0 ) {
+				else if( gnd::opsm::build_bmp32(&map, &opsm_map, gnd_m2dist( 1.0 / 20)) < 0 ) {
 					::fprintf(stderr, " ... \x1b[1m\x1b[31mERROR\x1b[39m\x1b[0m: fail to convert bmp\n");
 				}
 				else {
@@ -264,6 +264,10 @@ int main(int argc, char *argv[], char **env) {
 		gnd::inttimer timer_sleeping;
 
 		double cuito = 0;
+		double lh_max = 0.0;
+		double lh_min = 0.0;
+		double lh_ave = 0.0;
+
 
 		{ // ---> initialize previoous position
 			if( ssm_odometry.isOpen() )		prev = ssm_odometry.data;
@@ -369,8 +373,8 @@ int main(int argc, char *argv[], char **env) {
 				nline_show++;	::fprintf(stderr, "\x1b[K       cycle : %lf [s]\n", timer_operate.cycle() );
 				nline_show++;	::fprintf(stderr, "\x1b[K        prev : %lf %lf, %lf\n", prev.x, prev.y, gnd_ang2deg(prev.theta) );
 				nline_show++;	::fprintf(stderr, "\x1b[K       sleep : %lf [s]\n", sleep_time );
-				//				::fprintf(stderr, "     average : %.03lf\n", est_ave );
-				//				::fprintf(stderr, "   max - min : max %.03lf, min %.03lf\n", est_max, est_min );
+				nline_show++;	::fprintf(stderr, "\x1b[K     average : %.03lf\n", lh_ave );
+				nline_show++;	::fprintf(stderr, "\x1b[K   max - min : max %.03lf, min %.03lf\n", lh_max, lh_min );
 				//				::fprintf(stderr, "perform eval : %.03lf\n", perform);
 				//				::fprintf(stderr, " fail weight : %.03lf\n", fault_weight );
 				//				::fprintf(stderr, "   rest-mode : %s\n", ssm_position.isOpen() ? "on" : "off"  );
@@ -486,13 +490,24 @@ int main(int argc, char *argv[], char **env) {
 
 						// normalization
 						if(eval < 0 || cnt <= 0)	eval = 0;
-						else 						eval = (eval / (double) (0x8000 * cnt )) * (1.0 - pconf.mfailure.value) + pconf.mfailure.value;
+						else 				eval = (eval / (double) (0x8000 * cnt ));
+
+						if( lh_max < eval )		lh_max = eval;
+						if( i == 0 || lh_min > eval )	lh_min = eval;
+						lh_ave += eval;
 
 						ssm_evaluation.data.value[i] = eval;
 
 					} // <--- particle evaluation with laser scanner reading
 
 				} // <--- scanning loop (particle)
+				lh_ave /= ssm_particles.data.size();
+
+				if( lh_max <= 0 ) continue;
+				for( i = 0;  i < ssm_particles.data.size(); i++ ){
+					ssm_evaluation.data.value[i] = (ssm_evaluation.data.value[i] / lh_max) * (1.0 - pconf.mfailure.value) + pconf.mfailure.value;
+				}
+
 				ssm_evaluation.write( ssm_sokuikiraw.time );
 				cnt_eval++;
 

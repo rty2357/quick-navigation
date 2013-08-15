@@ -164,6 +164,18 @@ namespace opsm {
 				"input data culling parameter"
 		};
 
+		// blur
+		static const gnd::conf::parameter<double> ConfIni_Blur = {
+				"blur",
+				0.05,			// [m]
+		};
+
+		// matching failure
+		static const gnd::conf::parameter<double> ConfIni_ScanRangeDist = {
+				"scan-range-dist",
+				0,			// [m]
+		};
+
 		// matching failure
 		static const gnd::conf::parameter<double> ConfIni_MatchingFailureRate = {
 				"matching-failure-rate",
@@ -203,7 +215,9 @@ namespace opsm {
 			gnd::conf::parameter<double>			sleeping_orient;	///< criteria of rest mode (movement orient angle threshold)
 
 			gnd::conf::parameter<double>			cull;				///< reflection point cull
-			gnd::conf::parameter<double>			mfailure;			///< reflection point cull
+			gnd::conf::parameter<double>			blur;				///< scan range
+			gnd::conf::parameter<double>			scan_range;			///< scan range
+			gnd::conf::parameter<double>			mfailure;			///< matching failure rate
 
 			proc_configuration();
 		};
@@ -234,24 +248,26 @@ namespace opsm {
 		int proc_conf_initialize(proc_configuration *conf) {
 			gnd_assert(!conf, -1, "invalid null pointer");
 
-			::memcpy(&conf->bmp_map,			&ConfIni_BMPMap,			sizeof(ConfIni_BMPMap));
-			::memcpy(&conf->raw_map,			&ConfIni_RawMap,			sizeof(ConfIni_RawMap));
-			::memcpy(&conf->sokuikiraw_name,	&ConfIni_SokuikiRawName,	sizeof(ConfIni_SokuikiRawName) );
-			::memcpy(&conf->sokuikiraw_id,		&ConfIni_SokuikiRawID,		sizeof(ConfIni_SokuikiRawID) );
-			::memcpy(&conf->odometry_name,		&ConfIni_OdometryName,		sizeof(ConfIni_OdometryName) );
-			::memcpy(&conf->odometry_id,		&ConfIni_OdometryID,		sizeof(ConfIni_OdometryID) );
-			::memcpy(&conf->particle_name,		&ConfIni_ParticleName,		sizeof(ConfIni_ParticleName) );
-			::memcpy(&conf->particle_id,		&ConfIni_ParticleID,		sizeof(ConfIni_ParticleID) );
-			::memcpy(&conf->eval_name,			&ConfIni_ParticleEvalName,	sizeof(ConfIni_ParticleEvalName) );
-			::memcpy(&conf->eval_id,			&ConfIni_ParticleEvalID,	sizeof(ConfIni_ParticleEvalID) );
+			::memcpy(&conf->bmp_map,			&ConfIni_BMPMap,				sizeof(ConfIni_BMPMap));
+			::memcpy(&conf->raw_map,			&ConfIni_RawMap,				sizeof(ConfIni_RawMap));
+			::memcpy(&conf->sokuikiraw_name,	&ConfIni_SokuikiRawName,		sizeof(ConfIni_SokuikiRawName) );
+			::memcpy(&conf->sokuikiraw_id,		&ConfIni_SokuikiRawID,			sizeof(ConfIni_SokuikiRawID) );
+			::memcpy(&conf->odometry_name,		&ConfIni_OdometryName,			sizeof(ConfIni_OdometryName) );
+			::memcpy(&conf->odometry_id,		&ConfIni_OdometryID,			sizeof(ConfIni_OdometryID) );
+			::memcpy(&conf->particle_name,		&ConfIni_ParticleName,			sizeof(ConfIni_ParticleName) );
+			::memcpy(&conf->particle_id,		&ConfIni_ParticleID,			sizeof(ConfIni_ParticleID) );
+			::memcpy(&conf->eval_name,			&ConfIni_ParticleEvalName,		sizeof(ConfIni_ParticleEvalName) );
+			::memcpy(&conf->eval_id,			&ConfIni_ParticleEvalID,		sizeof(ConfIni_ParticleEvalID) );
 
-			::memcpy(&conf->cycle,				&ConfIni_Cycle,				sizeof(ConfIni_Cycle));
-			::memcpy(&conf->sleeping_time,		&ConfIni_SleepingTime,		sizeof(ConfIni_SleepingTime));
-			::memcpy(&conf->sleeping_dist,		&ConfIni_SleepingDist,		sizeof(ConfIni_SleepingDist));
-			::memcpy(&conf->sleeping_orient,	&ConfIni_SleepingOrient,	sizeof(ConfIni_SleepingOrient));
+			::memcpy(&conf->cycle,				&ConfIni_Cycle,					sizeof(ConfIni_Cycle));
+			::memcpy(&conf->sleeping_time,		&ConfIni_SleepingTime,			sizeof(ConfIni_SleepingTime));
+			::memcpy(&conf->sleeping_dist,		&ConfIni_SleepingDist,			sizeof(ConfIni_SleepingDist));
+			::memcpy(&conf->sleeping_orient,	&ConfIni_SleepingOrient,		sizeof(ConfIni_SleepingOrient));
 
-			::memcpy(&conf->cull,				&ConfIni_Cull,				sizeof(ConfIni_Cull));
-			::memcpy(&conf->mfailure,			&ConfIni_MatchingFailureRate,				sizeof(ConfIni_MatchingFailureRate));
+			::memcpy(&conf->cull,				&ConfIni_Cull,					sizeof(ConfIni_Cull));
+			::memcpy(&conf->blur,				&ConfIni_Blur,					sizeof(ConfIni_Blur));
+			::memcpy(&conf->scan_range,			&ConfIni_ScanRangeDist,			sizeof(ConfIni_ScanRangeDist));
+			::memcpy(&conf->mfailure,			&ConfIni_MatchingFailureRate,	sizeof(ConfIni_MatchingFailureRate));
 			return 0;
 		}
 
@@ -279,6 +295,8 @@ namespace opsm {
 			gnd::conf::get_parameter(src, &dest->sleeping_time);
 			gnd::conf::get_parameter(src, &dest->sleeping_dist);
 			gnd::conf::get_parameter(src, &dest->cull);
+			gnd::conf::get_parameter(src, &dest->blur);
+			gnd::conf::get_parameter(src, &dest->scan_range);
 			gnd::conf::get_parameter(src, &dest->mfailure);
 			if( gnd::conf::get_parameter(src, &dest->sleeping_orient) >= 0 ){
 				// convert unit of angle(deg2rad)
@@ -320,6 +338,8 @@ namespace opsm {
 			src->sleeping_orient.value = gnd_deg2rad(src->sleeping_orient.value);
 
 			gnd::conf::set_parameter(dest, &src->cull);
+			gnd::conf::set_parameter(dest, &src->blur);
+			gnd::conf::set_parameter(dest, &src->scan_range);
 			gnd::conf::set_parameter(dest, &src->mfailure);
 			return 0;
 		}
