@@ -120,10 +120,10 @@ fi
 
 # ls-coordinate-converter
 if [ -f ${_MAP_DIR_}/${_LS_CCONVERTER_CONF_} ]; then
-	cp -p ${_MAP_DIR_}/${_LS_CCONVERTER_CONF_} ${_LS_CCONVERTER_DIR_}/
-	echo "${_LS_CCONVERTER_CONF_} ... ok"
+	cp -p ${_MAP_DIR_}/${_LS_CCONVERTER_OPT_} ${_LS_CCONVERTER_DIR_}/${_LAUNCHER_OPT_}
+	echo "${_LS_CCONVERTER_OPT_} ... ok"
 else
-	echo "Warnning: ${_LS_CCONVERTER_CONF_} is not exist"
+	echo "Warnning: ${_LS_CCONVERTER_OPT_} is not exist"
 fi
 
 # opsm-map
