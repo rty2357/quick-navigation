@@ -15,9 +15,7 @@ _IS_NEW_=0
 # check to be modified
 ./qn-is-new
 
-_IS_NEW_=$?
-
-if [ ${_IS_NEW_} ]; then
+if [ $? -eq 1 ]; then
         echo ""
         echo "${_CURRENT_WORKING_} is modified."
         while true
