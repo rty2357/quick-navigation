@@ -83,7 +83,7 @@ fi
 
 
 # opsm-map
-if [ -f ${_WORKING_}/${_OPSM_MAP_} ]; then
+if [ -d ${_WORKING_}/${_OPSM_MAP_} ]; then
 	cp ${_WORKING_}/${_OPSM_MAP_} ${_MAP_DIR_}/${_OPSM_MAP_}
 	echo "${_OPSM_MAP_} ... ok"
 else
