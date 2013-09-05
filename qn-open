@@ -125,7 +125,7 @@ else
 fi
 
 # opsm-map
-if [ -f ${_MAP_DIR_}/${_OPSM_MAP_} ]; then
+if [ -d ${_MAP_DIR_}/${_OPSM_MAP_} ]; then
 	cp -p ${_MAP_DIR_}/${_OPSM_MAP_} ${_WORKING_}/${_OPSM_MAP_}
 	echo "${_OPSM_MAP_} ... ok"
 else
