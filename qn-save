@@ -1,9 +1,8 @@
 #!/bin/bash
-. .quick-navigation
+. .quick-navigation/shells
 . ${_META_DATA_}
 
-_MAP_DIR_=${_CURRENT_WORING_}
-_LAUNCHER_OPT_=launcher.opt
+_MAP_DIR_=${_CURRENT_WORKING_}
 
 # opsm-position-tracker
 if [ -f ${_P_TRACKER_DIR_}/${_P_TRACKER_CONF_} ]; then
@@ -82,5 +81,22 @@ else
 	echo "Error: ${_LS_CCONVERTER_DIR_}/${_LAUNCHER_OPT_} is not exist"
 fi
 
-echo "open ${_MAP_DIR_}"
+
+# opsm-map
+if [ -f ${_WORKING_}/${_OPSM_MAP_} ]; then
+	cp ${_WORKING_}/${_OPSM_MAP_} ${_MAP_DIR_}/${_OPSM_MAP_}
+	echo "${_OPSM_MAP_} ... ok"
+else
+	echo "Warnning: ${_OPSM_MAP_} is not exist"
+fi
+
+# route
+if [ -f ${_WORKING_}/${_ROUTE_} ]; then
+	cp ${_WORKING_}/${_ROUTE_} ${_MAP_DIR_}/${_ROUTE_}
+	echo "${_ROUTE_} ... ok"
+else
+	echo "Warnning: ${_ROUTE_} is not exist"
+fi
+
+echo "save ${_MAP_DIR_}"
 

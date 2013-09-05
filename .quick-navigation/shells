@@ -7,6 +7,7 @@ _ROUTE_EDITOR_DIR_=tkg-route-editor
 _LS_CCONVERTER_DIR_=ls-coordinate-converter
 _VISUALIZER_DIR_=visualizer
 _DATA_DIR_=data
+_WORKING_=${_DATA_DIR_}/working
 
 _P_TRACKER_CONF_=opsm-position-tracker.conf
 _P_EVALUATOR_CONF_=opsm-particle-evaluator.conf
@@ -18,5 +19,11 @@ _ROUTE_EDITOR_OPT_=tkg-route-editor.opt
 _LS_CCONVERTER_CONF_=ls-coordinate-converter.conf
 _LS_CCONVERTER_OPT_=ls-coordinate-converter.opt
 _VISUALIZER_CONF_=visualizer.conf
+_LAUNCHER_OPT_=launcher.opt
+_OPSM_MAP_=opsm-map
+_ROUTE_=keiro.dat
+
+
+_META_DATA_=.quick-navigation/working
 
 
