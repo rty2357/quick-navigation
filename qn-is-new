@@ -1,0 +1,94 @@
+#!/bin/bash
+. .quick-navigation/shells
+
+if [ -f ${_META_DATA_} ]; then
+	. ${_META_DATA_}
+fi
+
+_IS_NEW_=0
+
+if [ -z ${_CURRENT_WORKING_} ]; then
+	echo "nothing is working"
+	exit 0
+fi
+
+
+# opsm-position-tracker
+if [ ${_P_TRACKER_DIR_}/${_P_TRACKER_CONF_} -nt ${_CURRENT_WORKING_}/${_P_TRACKER_CONF_} ]; then
+	echo "${_P_TRACKER_DIR_}/${_P_TRACKER_CONF_} is modified."
+	_IS_NEW_=1
+fi
+
+
+# opsm-particle-evaluator
+if [ ${_P_EVALUATOR_DIR_}/${_P_EVALUATOR_CONF_} -nt ${_CURRENT_WORKING_}/${_P_EVALUATOR_CONF_} ]; then
+	echo "${_P_EVALUATOR_DIR_}/${_P_EVALUATOR_CONF_} is modified."
+	_IS_NEW_=1
+fi
+
+
+# particle-localizer
+if [ ${_LOCLIZER_DIR_}/${_LOCLIZER_CONF_} -nt ${_CURRENT_WORKING_}/${_LOCLIZER_CONF_} ]; then
+	echo "${_LOCLIZER_DIR_}/${_LOCLIZER_CONF_} is modified."
+	_IS_NEW_=1
+fi
+
+# path-planner
+if [ ${_PATH_PLAN_DIR_}/${_PATH_PLAN_CONF_} -nt ${_CURRENT_WORKING_}/${_PATH_PLAN_CONF_} ]; then
+	echo "${_PATH_PLAN_DIR_}/${_PATH_PLAN_CONF_} is modified."
+	_IS_NEW_=1
+fi
+if [ ${_PATH_PLAN_DIR_}/${_LAUNCHER_OPT_} -nt ${_CURRENT_WORKING_}/${_PATH_PLAN_OPT_} ]; then
+	echo "${_PATH_PLAN_DIR_}/${_LAUNCHER_OPT_} is modified."
+	_IS_NEW_=1
+fi
+
+
+# route-editor
+if [ ${_ROUTE_EDITOR_DIR_}/${_ROUTE_EDITOR_CONF_} -nt ${_CURRENT_WORKING_}/${_ROUTE_EDITOR_CONF_} ]; then
+	echo "${_ROUTE_EDITOR_DIR_}/${_ROUTE_EDITOR_CONF_} is modified."
+	_IS_NEW_=1
+fi
+if [ ${_ROUTE_EDITOR_DIR_}/${_LAUNCHER_OPT_} -nt ${_CURRENT_WORKING_}/${_ROUTE_EDITOR_OPT_} ]; then
+	echo "${_ROUTE_EDITOR_DIR_}/${_LAUNCHER_OPT_} is modified."
+	_IS_NEW_=1
+fi
+
+
+# visualizer
+if [ ${_VISUALIZER_DIR_}/${_VISUALIZER_CONF_} -nt ${_CURRENT_WORKING_}/${_VISUALIZER_CONF_} ]; then
+	echo "${_VISUALIZER_DIR_}/${_VISUALIZER_CONF_} is modified."
+	_IS_NEW_=1
+fi
+
+
+# ls-coordinate-converter
+if [ ${_LS_CCONVERTER_DIR_}/${_LS_CCONVERTER_CONF_} -nt ${_CURRENT_WORKING_}/${_LS_CCONVERTER_CONF_} ]; then
+	echo "${_LS_CCONVERTER_DIR_}/${_LS_CCONVERTER_CONF_} is modified."
+	_IS_NEW_=1
+fi
+if [ ${_LS_CCONVERTER_DIR_}/${_LAUNCHER_OPT_} -nt ${_CURRENT_WORKING_}/${_LS_CCONVERTER_OPT_} ]; then
+	echo "${_LS_CCONVERTER_DIR_}/${_LAUNCHER_OPT_} is modified."
+	_IS_NEW_=1
+fi
+
+
+# opsm-map
+if [ ${_WORKING_DIR_}/${_OPSM_MAP_} -nt ${_CURRENT_WORKING_}/${_OPSM_MAP_} ]; then
+	echo "${_WORKING_DIR_}/${_OPSM_MAP_} is modified."
+	_IS_NEW_=1
+fi
+
+# keiro.dat
+if [ ${_WORKING_DIR_}/${_ROUTE_} -nt ${_CURRENT_WORKING_}/${_ROUTE_} ]; then
+	echo "${_WORKING_DIR_}/${_ROUTE_} is modified."
+	_IS_NEW_=1
+fi
+
+if [ ${_IS_NEW_} -eq 0 ]; then
+	echo "${_CURRENT_WORKING_} is not modified"
+fi
+
+exit ${_IS_NEW_}
+
+
