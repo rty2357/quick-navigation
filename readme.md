@@ -45,17 +45,17 @@ quick-navigation
   
 * **opsm-particle-evaluator** レーザスキャナの観測確率による自己位置（パーティクル）の評価
 
-    参照として**opsm-position-tracker**により作成した地図を必要とする
+    参照として **opsm-position-tracker** により作成した地図を必要とする
 
 * **ysd-path-planner** 指示された経路上を走行する
 
-    経路は**tkg-route-editor**により作成，編集する
+    経路は **tkg-route-editor** により作成，編集する
 
 * **tkg-route-editor** 経路編集GUI
 
     地図作成のために事前走行した際の軌跡を描画
     
-    周囲の環境を示すために**opsm-position-tracker**により作成した地図を描画
+    周囲の環境を示すために **opsm-position-tracker** により作成した地図を描画
 
 * **visualizer** センサデータおよびロボットの状態の可視化
 
@@ -70,40 +70,77 @@ makeで各プロセスを一括コンパイル
     $ make
 
 # 4 使用方法
-## 4.1 新規データ作成
-初めにシェルスクリプト**qn-new**により空のデータを作成する
+※ 本節で表記するコマンドはディレクトリ"quick-navigation"内での操作を示す
 
-    ./qn-new <データ名>
+## 4.1 環境地図と経路の作成
+以下のコマンドで新規にデータを作成する。
 
-下記に示す「環境地図の作成」および「経路の編集」により環境地図と経路を作成，保存する．
+    $ ./qn-new <data-name>
+
 作成されたデータはディレクトリ"data"以下に保存される
 
 ## 4.1.1 環境地図の作成
 
 - 初期位置を決めてロボットを設置
 - ロボットの制御ボードおよびレーザスキャナに電源を投入
-- 以下のプログラムを起動
+- 以下のプログラムをそれぞれターミナルで起動
     - ssm-coordinator
+
+            $ ssm-coordinator
+
     - ypspur-coordinator
+
+            $ ypspur-coordinator -p <robot-param> -d <device-path,default:/dev/ttyUSB0>
+
     - urg-proxy
-    - psm-position-tracker
+
+            $ cd urg-proxy -p <urg-device-path,default:/dev/ttyACM0>
+            $ ./launcher
+
+    - opsm-position-tracker
+
+            $ cd opsm-position-tracker
+            $ ./launcher
+
     - ls-coordinate-converter
+
+            $ cd ls-coordinator-converter
+            $ ./launcher
+
     - visualizer
+
+            $ cd visualizer
+            $ ./launcher
+
 - リモコンで操作するなどして経路を走行
-- killssmコマンドにより終了
+- killssmコマンドにより地図作成終了
+
+         $ killssm
+
+- 作成した地図を保存
+
+         $ ./qn-save
 
 
 ## 4.1.2 経路の編集
 
 - 以下のプログラムを起動
     - tkg-route-editor
-※ 右ダブルクリックでウェイポイントの追加
-※ 右クリックドラッグでウェイポイントの位置の変更
-※  "save"+Enterキーで保存
+
+            $ cd tkg-route-editor
+            $ ./launcher
+
+※ 右ウェイポイントの追加: 右ダブルクリック  
+※ ウェイポイントの位置の変更: 右ドラッグ  
+※  "save"をキー入力して保存  
+
+- 作成した経路を保存
+
+         $ ./qn-save
 
 
 ## 4.2 自律走行
-シェルスクリプト**qn-open**により走行する環境のデータをロードする
+シェルスクリプト **qn-open** により走行する環境のデータをロードする
 
     ./qn-open <データディレクトリ>
 
@@ -113,10 +150,40 @@ makeで各プロセスを一括コンパイル
 - ロボットの制御ボードおよびレーザスキャナに電源を投入
 - 以下のプログラムを起動
     - ssm-coordinator
+
+            $ ssm-coordinator
+
     - ypspur-coordinator
+
+            $ ypspur-coordinator -p <robot-param> -d <device-path,default:/dev/ttyUSB0>
+
     - urg-proxy
+
+            $ cd urg-proxy -p <urg-device-path,default:/dev/ttyACM0>
+            $ ./launcher
+
     - particle-localizer
+
+            $ cd particle-localizer
+            $ ./launcher
+
     - opsm-particle-evaluator
+
+            $ cd opsm-particle-evaluator
+            $ ./launcher
+
     - ls-coordinate-converter
+
+            $ cd ls-coordinate-converter
+            $ ./launcher
+
     - visualizer
+
+            $ cd visualizer
+            $ ./launcher
+
     - ysd-path-planner
+
+            $ cd ysd-path-planner
+            $ ./launcher
+
