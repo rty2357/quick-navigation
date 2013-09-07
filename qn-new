@@ -1,16 +1,54 @@
 #!/bin/bash
 . .quick-navigation/shells
 
+if [ -f ${_META_DATA_} ]; then
+	. ${_META_DATA_}
+fi
+
+
 if [ $# -ne 1 ]; then
 	echo "Usage: $0 <new-map's-name>"
 	echo "e.g.) $0 my-room"
 	exit 1
 fi
 
+_FORCE_=0
+while getopts f OPT
+do
+	case ${OPT} in
+		"f" ) _FORCE_=1;;
+		* ) echo "Usage: $0 <map's-name>";
+		    echo "e.g.) $0 my-room";
+		    exit 1;;
+	esac
+done
 
+shift `expr $OPTIND - 1`
+_NEW_MAP_DIR_=${_DATA_DIR_}/${1}
 _TEMPLATE_DIR_=${_DATA_DIR_}/.template
 
-_NEW_MAP_DIR_=${_DATA_DIR_}/${1}
+# check to be modified
+if [ ${_FORCE_} != "1" -a "${_CURRENT_WORKING_}" != "" ]; then
+	./qn-is-new
+	if [ $? = "1" ]; then
+		echo ""
+		echo "${_CURRENT_WORKING_} is modified."
+		while true
+		do 
+		        echo " Do you open ${_MAP_DIR_} without save? ... [y/n]"
+		        read yn
+
+		        if [ -z $yn ]; then 
+		                continue
+		        elif [ $yn = YES -o $yn = Yes -o $yn = yes -o $yn = Y -o $yn = y ]; then
+		                break
+		        elif [ $yn = NO -o $yn = No -o $yn = no -o $yn = N -o $yn = n ]; then
+			        echo " ... canceled"
+				exit 0
+		        fi
+		done 
+	fi
+fi
 
 
 if [ -d ${_NEW_MAP_DIR_} ]; then
@@ -106,5 +144,5 @@ else
 fi
 
 
-./qn-open ${_NEW_MAP_DIR_}
+./qn-open -f ${_NEW_MAP_DIR_}
 

@@ -74,14 +74,14 @@ fi
 
 
 # opsm-map
-if [ ${_WORKING_DIR_}/${_OPSM_MAP_} -nt ${_CURRENT_WORKING_}/${_OPSM_MAP_} ]; then
-	echo "${_WORKING_DIR_}/${_OPSM_MAP_} is modified."
+if [ ${_WORKING_}/${_OPSM_MAP_} -nt ${_CURRENT_WORKING_}/${_OPSM_MAP_} ]; then
+	echo "${_WORKING_}/${_OPSM_MAP_} is modified."
 	_IS_NEW_=1
 fi
 
 # keiro.dat
-if [ ${_WORKING_DIR_}/${_ROUTE_} -nt ${_CURRENT_WORKING_}/${_ROUTE_} ]; then
-	echo "${_WORKING_DIR_}/${_ROUTE_} is modified."
+if [ ${_WORKING_}/${_ROUTE_} -nt ${_CURRENT_WORKING_}/${_ROUTE_} ]; then
+	echo "${_WORKING_}/${_ROUTE_} is modified."
 	_IS_NEW_=1
 fi
 

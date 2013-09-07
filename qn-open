@@ -1,47 +1,61 @@
 #!/bin/bash
 . .quick-navigation/shells
-. .quick-navigation/working
+if [ -f ${_META_DATA_} ]; then
+	. ${_META_DATA_}
+fi
 
-if [ $# -ne 1 ]; then
+
+if [ $# -lt 1 ]; then
 	echo "Usage: $0 <map's-name>"
 	echo "e.g.) $0 my-room"
 	exit 1
 fi
 
-_MAP_DIR_=${1}
-_LAUNCHER_OPT_=launcher.opt
-_IS_NEW_=0
+
+_FORCE_=0
+while getopts f OPT
+do
+	case ${OPT} in
+		"f" ) _FORCE_=1;;
+		* ) echo "Usage: $0 <map's-name>";
+		    echo "e.g.) $0 my-room";
+		    exit 1;;
+	esac
+done
+
+shift `expr $OPTIND - 1`
+_MAP_DIR_=$1
+
+if [ _MAP_DIR_ = "" ]; then
+	echo "Usage: [-f] $0 <map's-name>"
+	echo "e.g.) $0 my-room"
+	exit 1
+fi
 
 # check to be modified
-./qn-is-new
+if [ ${_FORCE_} != "1" ]; then
+	./qn-is-new
+	if [ $? = "1" ]; then
+		echo ""
+		echo "${_CURRENT_WORKING_} is modified."
+		while true
+		do 
+		        echo " Do you open ${_MAP_DIR_} without save? ... [y/n]"
+		        read yn
 
-if [ $? -eq 1 ]; then
-        echo ""
-        echo "${_CURRENT_WORKING_} is modified."
-        while true
-        do 
-                echo " Do you open ${_MAP_DIR_} without save? ... [y/n]"
-                read yn
-
-                if [ -z $yn ]; then 
-                        continue
-                elif [ $yn = YES -o $yn = Yes -o $yn = yes -o $yn = Y -o $yn = y ]; then
-                        break
-                elif [ $yn = NO -o $yn = No -o $yn = no -o $yn = N -o $yn = n ]; then
-	                echo " ... canceled"
-			exit 0
-                fi
-        done 
-fi
-
-# make working data directory
-if [ ! -d ${_WORKING_} ]; then
-	mkdir -p ${_WORKING_}
-	if [ $? ]; then
-		echo "Error: fail to make directory."
-		exit 1
+		        if [ -z $yn ]; then 
+		                continue
+		        elif [ $yn = YES -o $yn = Yes -o $yn = yes -o $yn = Y -o $yn = y ]; then
+		                break
+		        elif [ $yn = NO -o $yn = No -o $yn = no -o $yn = N -o $yn = n ]; then
+			        echo " ... canceled"
+				exit 0
+		        fi
+		done 
 	fi
 fi
+
+_LAUNCHER_OPT_=launcher.opt
 
 # opsm-position-tracker
 if [ -f ${_MAP_DIR_}/${_P_TRACKER_CONF_} ]; then
@@ -124,9 +138,20 @@ else
 	echo "Warnning: ${_LS_CCONVERTER_OPT_} is not exist"
 fi
 
+
+# make working data directory
+if [ -d ${_WORKING_} ]; then
+	rm -rf ${_WORKING_}
+fi
+
+mkdir -p ${_WORKING_}
+if [ "$?" != "0" ]; then
+	echo "Error: fail to make directory."
+	exit 1
+fi
 # opsm-map
 if [ -d ${_MAP_DIR_}/${_OPSM_MAP_} ]; then
-	cp -p ${_MAP_DIR_}/${_OPSM_MAP_} ${_WORKING_}/${_OPSM_MAP_}
+	cp -p -r ${_MAP_DIR_}/${_OPSM_MAP_} ${_WORKING_}/
 	echo "${_OPSM_MAP_} ... ok"
 else
 	echo "Warnning: ${_OPSM_MAP_} is not exist"
