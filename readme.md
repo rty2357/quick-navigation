@@ -29,11 +29,11 @@ quick-navigation
 
 * **ls-coordinate-converter** レーザスキャナのスキャンデータの座標変換
 
-* **opsm-position-tracker** オドメトリとレーザスキャナの観測確率に基づくスキャンマッチングにより自己位置を推定し，同時に地図を作成
+* **opsm-position-tracker** オドメトリとスキャンマッチングにより自己位置を推定し，同時に地図を作成
 
     スキャンマッチングの参照として，少し前の時点のスキャンデータを用いる
     
-    作成される地図はスキャン点の観測確率による尤度場
+    作成される地図は複数スキャンにおける点群の密度による尤度場
 
 * **particle-localizer** 自己位置の推定の推定および管理
 
@@ -43,9 +43,11 @@ quick-navigation
     
     他のプロセスからパーティクルの評価を得て，リサンプリングを行う
   
-* **opsm-particle-evaluator** レーザスキャナの観測確率による自己位置（パーティクル）の評価
+* **opsm-particle-evaluator** レーザスキャナによる自己位置（パーティクル）の評価
 
-    参照として **opsm-position-tracker** により作成した地図を必要とする
+    複数スキャンにおける点群の密度をもとに自己位置推定に有意な特徴に重み付けをして評価する
+
+    参照スキャンとして **opsm-position-tracker** により作成した地図を必要とする
 
 * **ysd-path-planner** 指示された経路上を走行する
 
@@ -94,8 +96,8 @@ makeで各プロセスを一括コンパイル
 
     - urg-proxy
 
-            $ cd urg-proxy -p <urg-device-path,default:/dev/ttyACM0>
-            $ ./launcher
+            $ cd urg-proxy
+            $ ./launcher -p <urg-device-path,default:/dev/ttyACM0>
 
     - opsm-position-tracker
 
@@ -130,7 +132,7 @@ makeで各プロセスを一括コンパイル
             $ cd tkg-route-editor
             $ ./launcher
 
-※ 右ウェイポイントの追加: 右ダブルクリック  
+※ ウェイポイントの追加: 右ダブルクリック  
 ※ ウェイポイントの位置の変更: 右ドラッグ  
 ※  "save"をキー入力して保存  
 
@@ -159,8 +161,8 @@ makeで各プロセスを一括コンパイル
 
     - urg-proxy
 
-            $ cd urg-proxy -p <urg-device-path,default:/dev/ttyACM0>
-            $ ./launcher
+            $ cd urg-proxy
+            $ ./launcher -p <urg-device-path,default:/dev/ttyACM0>
 
     - particle-localizer
 
