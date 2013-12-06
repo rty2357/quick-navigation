@@ -22,6 +22,7 @@
 
 #include "gnd-util.h"
 #include "gnd-random.hpp"
+#include "gnd-timer.hpp"
 #include "gnd-shutoff.hpp"
 
 #include "particle-localizer-opt.hpp"
@@ -42,6 +43,7 @@ int main(int argc, char* argv[], char *envp[]) {
 	SSMApi<Spur_Odometry> ssm_position;
 	SSMParticles ssm_particle;
 	SSMParticleEvaluation ssm_estimation;
+	SSMApi<Spur_Odometry> ssm_initpos;
 
 	gnd::cui_reader gcui;
 	Localizer::proc_configuration pconf;
@@ -177,7 +179,7 @@ int main(int argc, char* argv[], char *envp[]) {
 
 
 
-		 // ---> get configure
+		// ---> get configure
 		if( !is_proc_shutoff() ){
 
 			Localizer::proc_conf_sampling_ratio_normalize(&pconf);
@@ -210,7 +212,6 @@ int main(int argc, char* argv[], char *envp[]) {
 		} // <--- set initialize position covariance matrix
 
 
-
 		// ---> initialize ssm
 		if( !is_proc_shutoff() ) {
 			::fprintf(stderr, "\n");
@@ -229,7 +230,7 @@ int main(int argc, char* argv[], char *envp[]) {
 		if( !is_proc_shutoff() ) {
 			::fprintf(stderr, "\n");
 			::fprintf(stderr, " => create ssm-data \"\x1b[4m%s\x1b[0m\"\n", SNAME_ADJUST );
-			if( !ssm_position.create( SNAME_ADJUST, 0, 1, 0.005) ){
+			if( !ssm_position.create( SNAME_ADJUST, 0, 5, 0.005) ){
 				::fprintf(stderr, "  \x1b[1m\x1b[31mERROR\x1b[39m\x1b[0m: fail to create \"\x1b[4m%s\x1b[0m\"\n", SNAME_ADJUST );
 				proc_shutoff();
 			}
@@ -362,7 +363,7 @@ int main(int argc, char* argv[], char *envp[]) {
 
 	if( !is_proc_shutoff() ){ // ---> operation
 		int rsmpl_cnt = 0,
-			reject_cnt = 0;
+				reject_cnt = 0;
 		ssmTimeT rsmp_time = 0;
 		ssmTimeT prev_time = mtr.time;
 		bool show_st = true;
@@ -420,7 +421,7 @@ int main(int argc, char* argv[], char *envp[]) {
 					else {
 						switch(cuival) {
 						// exit
-						case 'e': proc_shutoff(); break;
+						case 'Q': proc_shutoff(); break;
 						// help
 						case 'h': gcui.show(stderr, "   "); break;
 						// debug log-mode
@@ -459,6 +460,60 @@ int main(int argc, char* argv[], char *envp[]) {
 						case 'B': cuito = -1;		break;
 						// start
 						case 'o': cuito = 0;		break;
+
+						case 'S': {
+							gnd::cui_reader cuiS;
+							int cuivalS = 0;
+							char cuiargS[512];
+
+							static const gnd::cui_command cmdS[] = {
+									{"Cancel",		'c',	"cancel"},
+									{"", '\0'}
+							};
+
+							cuiS.set_command(cmdS, sizeof(cmdS) / sizeof(cmdS[0]));
+
+							if ( ssm_initpos.isOpen() ) {
+								// ignore old data
+								ssm_initpos.readLast();
+							}
+
+							// ---> wait to read initial position
+							::fprintf(stderr, "     > push Enter to cancel\n");
+							while (1) {
+								if ( !ssm_initpos.isOpen() ) {
+									if( ssm_initpos.openWait("init-pos", 0, 0.1) ) {
+										ssm_initpos.setBlocking(false);
+										ssm_initpos.readLast();
+									}
+								}
+								else {
+									if( ssm_initpos.readNew() ) {
+										ssm_position.data.x = ssm_initpos.data.x;
+										ssm_position.data.y = ssm_initpos.data.y;
+										ssm_position.data.theta = ssm_initpos.data.theta;
+										ssm_position.data.v = 0;
+										ssm_position.data.w = 0;
+
+										myu_ini[0][PARTICLE_X] = ssm_initpos.data.x;
+										myu_ini[0][PARTICLE_Y] = ssm_initpos.data.y;
+										myu_ini[0][PARTICLE_THETA] = ssm_initpos.data.theta;
+										// create initialize position
+										ssm_particle.data.init_particle(&myu_ini,
+												&pconf.poserr_cover_ini, &pconf.syserr_cover_ini, pconf.particles.value + pconf.random_sampling.value);
+
+										ssm_position.write();
+										ssm_particle.write();
+										::fprintf(stderr, "  ... read initial position\n");
+										break;
+									}
+								}
+								if( cuiS.poll(&cuivalS, cuiargS, sizeof(cuiargS), 1.0 / 60.0) > 0 ){
+									::fprintf(stderr, "  ... canceled\n");
+									break;
+								}
+							} // <--- wait to read initial position
+						} break;
 
 						case '\0':
 							break;
@@ -513,6 +568,15 @@ int main(int argc, char* argv[], char *envp[]) {
 			if( mtr.readNext() ){
 				int cnt1 = (pconf.k_lwheel_crot.value ? -1 : 1) * mtr.data.counter1;
 				int cnt2 = (pconf.k_rwheel_crot.value ? -1 : 1) * mtr.data.counter2;
+
+				//swap right-left motor if flag is true.
+				if( pconf.k_swap_rwmotor.value )
+				{
+					int buf = cnt1;
+					cnt1 = cnt2;
+					cnt2 = buf;
+				}
+
 				// compute pertilecs motion
 				if( !pconf.gyro.value ) {
 					ssm_particle.data.odometry_motion(cnt1, cnt2);
@@ -656,7 +720,7 @@ int main(int argc, char* argv[], char *envp[]) {
 					// save resampling time
 					rsmp_time = prev_time + 1.0e-6;
 					// write ssm
-					ssm_particle.write( rsmp_time );
+					ssm_particle.write( mtr.time );
 
 
 				} // <--- resampling

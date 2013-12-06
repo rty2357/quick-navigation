@@ -58,6 +58,14 @@ namespace Localizer {
 	};
 
 	/*
+	 * @brief swap right left motor
+	 */
+	static const gnd::conf::parameter<bool> ConfIni_KSwapRightLehtMotor = {
+			"swap-right-left-motor",
+			false
+	};
+
+	/*
 	 * @brief tread radius parameter
 	 */
 	static const gnd::conf::parameter<double> ConfIni_KTread = {
@@ -277,6 +285,7 @@ namespace Localizer {
 		gnd::conf::parameter<bool>									k_rwheel_crot;
 		gnd::conf::parameter<double>								k_lwheel;
 		gnd::conf::parameter<bool>									k_lwheel_crot;
+		gnd::conf::parameter<bool>									k_swap_rwmotor;
 		gnd::conf::parameter<double>								k_tread;
 		gnd::conf::parameter<double>								k_gear;
 		gnd::conf::parameter<double>								k_encoder;
@@ -505,6 +514,7 @@ namespace Localizer {
 		::memcpy(&conf->k_lwheel_crot,				&ConfIni_KLeftWheelCRot,					sizeof(ConfIni_KLeftWheelCRot));
 		::memcpy(&conf->k_rwheel,					&ConfIni_KRightWheel,					sizeof(ConfIni_KRightWheel));
 		::memcpy(&conf->k_rwheel_crot,				&ConfIni_KRightWheelCRot,				sizeof(ConfIni_KRightWheelCRot));
+		::memcpy(&conf->k_swap_rwmotor,				&ConfIni_KSwapRightLehtMotor,				sizeof(ConfIni_KSwapRightLehtMotor));
 		::memcpy(&conf->k_tread,					&ConfIni_KTread,						sizeof(ConfIni_KTread));
 		::memcpy(&conf->k_gear,						&ConfIni_KGear,							sizeof(ConfIni_KGear));
 		::memcpy(&conf->k_encoder,					&ConfIni_KEncoder,						sizeof(ConfIni_KEncoder));
@@ -586,7 +596,6 @@ namespace Localizer {
 				gnd::matrix::set(&conf->syserr_cover, 2, 2,
 						gnd_square( conf->syserr_conf.value[2] * conf->gyro_sf.value )  );
 			}
-
 		} // <--- resampleing for systematic error
 
 		{ // ---> resampleing for systematic error
@@ -646,6 +655,7 @@ namespace Localizer {
 		gnd::conf::get_parameter(src, &dest->k_rwheel_crot);
 		gnd::conf::get_parameter(src, &dest->k_lwheel);
 		gnd::conf::get_parameter(src, &dest->k_lwheel_crot);
+		gnd::conf::get_parameter(src, &dest->k_swap_rwmotor);
 		gnd::conf::get_parameter(src, &dest->k_tread);
 		gnd::conf::get_parameter(src, &dest->k_gear);
 		gnd::conf::get_parameter(src, &dest->k_encoder);
@@ -698,6 +708,7 @@ namespace Localizer {
 		gnd::conf::set_parameter(dest, &src->k_rwheel_crot);
 		gnd::conf::set_parameter(dest, &src->k_lwheel);
 		gnd::conf::set_parameter(dest, &src->k_lwheel_crot);
+		gnd::conf::set_parameter(dest, &src->k_swap_rwmotor);
 		gnd::conf::set_parameter(dest, &src->k_tread);
 		gnd::conf::set_parameter(dest, &src->k_gear);
 		gnd::conf::set_parameter(dest, &src->k_encoder);

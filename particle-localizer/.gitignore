@@ -1,0 +1,15 @@
+*.bmp
+*.dat
+*.txt
+*.log
+
+/*.cmap
+/*.conf
+/launcher
+/Release
+/Debug
+/opsm-map
+
+/.cproject
+/.project
+
