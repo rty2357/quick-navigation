@@ -1,0 +1,9 @@
+*.log
+
+/launcher
+/Release
+/Debug
+
+/.cproject
+/.project
+

@@ -13,6 +13,7 @@
 #include <ssmtype/spur-odometry.h>
 
 #include "ls-coordinate-converter-opt.hpp"
+#include "ls-coordinate-converter-cui.hpp"
 
 #include "gnd-matrix-base.hpp"
 #include "gnd-vector-base.hpp"
@@ -32,6 +33,8 @@ int main(int argc, char* argv[], char* env[]) {
 
 	gnd::ls_cc::proc_configuration		pconf;	// proccess configuration
 	gnd::ls_cc::options					opt_reader(&pconf);
+
+	gnd::cui_reader						gcui;	// cui reader
 
 	FILE *fp_gltxtlog = 0;
 
@@ -175,6 +178,10 @@ int main(int argc, char* argv[], char* env[]) {
 
 		} // <--- log file open
 
+		{ // ---> cui setting
+			gcui.set_command( gnd::ls_cc::cui_cmd, sizeof(gnd::ls_cc::cui_cmd) / sizeof(gnd::ls_cc::cui_cmd[0]) );
+		} // <--- cui setting
+
 	} // <--- initialize
 
 
@@ -182,12 +189,77 @@ int main(int argc, char* argv[], char* env[]) {
 	{ // ---> operation
 		int nline_show = 0;
 		unsigned long cnt_scan = 0;
-		gnd::inttimer timer_show(CLOCK_REALTIME, 1.0);
+		gnd::inttimer timer_show;
+
+		timer_show.begin( CLOCK_REALTIME, 1.0, -1.0 );
 
 		// ---> main loop
 		while( !::is_proc_shutoff() ) {
+			{ // ---> cui
+				int cuival = 0;
+				int cuito = 0;
+				char cuiarg[512];
+				// zero reset buffer
+				::memset( cuiarg, 0, sizeof(cuiarg) );
+
+				// ---> cui: operation
+				if(	gcui.poll(&cuival, cuiarg, sizeof(cuiarg), cuito ) > 0 ) {
+					if( timer_show.cycle() > 0 ) { // ---> not cui mode
+						// quit show status mode and change to cui mode
+						timer_show.end();
+						::fprintf(stderr, "-------------------- cui mode --------------------\n");
+					} // <--- not cui mode
+					else { // ---> cui mode
+						switch( cuival ) {
+						// quit
+						case 'Q': ::proc_shutoff();	break;
+						// show status mode
+						case 's': timer_show.begin( CLOCK_REALTIME, 1.0, -1.0 ); break;
+						//
+						case 'n': {
+							char fname[64];
+							FILE *fp = 0;
+
+							::snprintf(fname, sizeof(fname) - 1 , "%s", (*cuiarg != 0) ? cuiarg : "scan.dat");
+							::fprintf(stderr, "   file out snap-shot ... \n");
+							if( !(fp = ::fopen(fname, "w"))) {
+								::fprintf(stderr, "   Error: fail to open \"%s\"\n", fname);
+								break;
+							}
+							::fprintf(fp, "#[1.No] [2.x] [3.y] [4.z] [5.origin-x] [6.origin-y] [7.origin-z] [8.intensity]\n");
+
+							// ---> scanning loop (sokuiki fs)
+							for( int i = 0; i < (signed)ssm_sokuiki_fs.data.numPoints(); i++ ) {
+								if( ssm_sokuiki_fs.data[i].isError() || ssm_sokuiki_fs.data[i].status == ssm::laser::STATUS_NO_REFLECTION) {
+									continue;
+								}
+								else {
+									::fprintf(fp, "%d %lf %lf %lf %lf %lf %lf %lf\n",i, ssm_sokuiki_fs.data[i].reflect.x, ssm_sokuiki_fs.data[i].reflect.y, ssm_sokuiki_fs.data[i].reflect.z,
+											ssm_sokuiki_fs.data[i].origin.x, ssm_sokuiki_fs.data[i].origin.y, ssm_sokuiki_fs.data[i].origin.z, ssm_sokuiki_fs.data[i].intensity);
+								}
+							} // <--- scanning loop (sokuiki fs)
+
+							::fclose(fp);
+							::fprintf(stderr, "   save \"%s\"\n", fname);
+
+						} break;
+
+						// help;
+						default:
+						case '\0':
+						case 'h': gcui.show(stderr, "   "); break;
+						}
+					} // <--- cui mode
+					// flush
+					gcui.poll(&cuival, cuiarg, sizeof(cuiarg), cuito );
+					// show command line
+					::fprintf(stderr, "  > ");
+				} // <--- cui: operation
+			} // <--- cui
+
+
 			// ---> show status
-			if( timer_show.clock() ){
+			if( timer_show.clock() > 0 ){
 				// back cursor
 				if( nline_show ) {
 					::fprintf(stderr, "\x1b[%02dA", nline_show);
@@ -231,7 +303,7 @@ int main(int argc, char* argv[], char* env[]) {
 							ssm_sokuiki_fs.data[i].intensity = ssm_sokuiki_raw.data[i].intensity;
 							ssm_sokuiki_fs.data[i].origin.x = ssm_sokuiki_raw.property.coordm[0][3];
 							ssm_sokuiki_fs.data[i].origin.y = ssm_sokuiki_raw.property.coordm[1][3];
-							ssm_sokuiki_fs.data[i].origin.z = ssm_sokuiki_raw.property.coordm[1][3];
+							ssm_sokuiki_fs.data[i].origin.z = ssm_sokuiki_raw.property.coordm[2][3];
 						} // <---  set value of other kinds
 					}
 				} // <--- scanning loop (sokuiki raw)
@@ -252,7 +324,7 @@ int main(int argc, char* argv[], char* env[]) {
 					{ // origin
 						ws[0] = ssm_sokuiki_raw.property.coordm[0][3];
 						ws[1]= ssm_sokuiki_raw.property.coordm[1][3];
-						ws[2] = ssm_sokuiki_raw.property.coordm[1][3];
+						ws[2] = ssm_sokuiki_raw.property.coordm[2][3];
 						ws[3] = 1.0;
 
 						gnd::matrix::prod(&cm, &ws, &org_gl );
@@ -312,6 +384,8 @@ int main(int argc, char* argv[], char* env[]) {
 
 
 	{ // ---> finalize
+		::fprintf(stderr, "\n");
+		::fprintf(stderr, "========== Finalize ==========\n");
 
 		{ // ---> finalize ssm
 			if( ssm_sokuiki_raw.isOpen() )	ssm_sokuiki_raw.close() ;
@@ -320,6 +394,8 @@ int main(int argc, char* argv[], char* env[]) {
 		} // <--- finalize ssm
 
 		if( fp_gltxtlog ) ::fclose(fp_gltxtlog);
+
+		::fprintf(stderr, " ... Finish.\n");
 
 	} // <--- finalize
 
